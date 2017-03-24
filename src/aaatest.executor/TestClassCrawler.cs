@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -20,15 +21,40 @@ namespace aaatest.executor
 
             return
                 typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public).
-                    Where(method => method.ReturnType == typeof(TestCase)).
+                    Where(IsUnitTestMethod).
                     Select(TraceMethodFound).
-                    Select(method => (method: method, testCase: (TestCase) method.Invoke(new T(), null))).
-                    Select(test => test.testCase.SetName(test.method.Name));
+                    SelectMany(DiscoverTests).
+                    Select(SetTestName);
+        }
+
+        private static TestCase SetTestName((MethodInfo method, TestCase testCase) test)
+        {
+            return test.testCase.SetName(test.method.Name);
+        }
+
+        private static IEnumerable<(MethodInfo method, TestCase testCase)> DiscoverTests(MethodInfo method)
+        {
+            IEnumerable<TestCase> testCases;
+            if (method.ReturnType == typeof(TestCase))
+                testCases = new[] {(TestCase) method.Invoke(new T(), null)};
+            else if (method.ReturnType == typeof(IEnumerable<TestCase>))
+                testCases = (IEnumerable<TestCase>) method.Invoke(new T(), null);
+            else
+                throw new InvalidOperationException();
+            return testCases.Select(testCase => (method: method, testCase: testCase));
+        }
+
+
+        private static bool IsUnitTestMethod(MethodInfo method)
+        {
+            return
+                method.ReturnType == typeof(TestCase) || // single test
+                method.ReturnType == typeof(IEnumerable<TestCase>); // multiple tests
         }
 
         private MethodInfo TraceMethodFound(MethodInfo method)
         {
-            _tracer.Debug($"Found {method.Name}");
+            _tracer.Debug($"Discovering {method.Name}");
             return method;
         }
     }
