@@ -1,4 +1,5 @@
-﻿using aaatest.framework;
+﻿using System.Collections.Generic;
+using aaatest.framework;
 using FluentAssertions;
 
 namespace tester
@@ -9,14 +10,16 @@ namespace tester
         {
             return Test(
                 context => context.CreateSubject(),
-                subject => subject.AddTwoValues(1, 2), result => { result.Should().Be(3); });
+                subject => subject.AddTwoValues(1, 2),
+                result => result.Should().Be(3));
         }
 
-        public TestCase AddTwoValuesWorks2()
+        public TestCase AddTwoValuesFails()
         {
             return Test(
                 context => context.CreateSubject(),
-                subject => subject.AddTwoValues(1, 2), result => { result.Should().Be(4); });
+                subject => subject.AddTwoValues(1, 2),
+                result => result.Should().Be(4));
         }
     }
 }

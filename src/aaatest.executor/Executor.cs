@@ -12,11 +12,14 @@ namespace aaatest.executor
         private readonly ConcurrentDictionary<Type, Func<TestCase, ValueTask<TestExecutionResult>>> _executors
             = new ConcurrentDictionary<Type, Func<TestCase, ValueTask<TestExecutionResult>>>();
 
+        private readonly IFailureDetector _failureDetector;
+
         private readonly ITracer _tracer;
 
-        public Executor(ITracer tracer)
+        public Executor(ITracer tracer, IFailureDetector failureDetector)
         {
             _tracer = tracer;
+            _failureDetector = failureDetector;
         }
 
         public ValueTask<TestExecutionResult> Execute(TestCase test)
@@ -29,20 +32,20 @@ namespace aaatest.executor
             }
         }
 
-        private static Func<TestCase, ValueTask<TestExecutionResult>> GenerateExecutor(Type testCaseType)
+        private Func<TestCase, ValueTask<TestExecutionResult>> GenerateExecutor(Type testCaseType)
         {
             var executeSpecificTestMethod = typeof(Executor).GetMethod(nameof(ExecuteSpecificTestAsync),
-                BindingFlags.NonPublic | BindingFlags.Static);
+                BindingFlags.NonPublic | BindingFlags.Instance);
 
             var executeSpecificMethodGeneric =
                 executeSpecificTestMethod.MakeGenericMethod(testCaseType.GetGenericArguments());
 
             return
                 (Func<TestCase, ValueTask<TestExecutionResult>>)
-                executeSpecificMethodGeneric.CreateDelegate(typeof(Func<TestCase, ValueTask<TestExecutionResult>>));
+                executeSpecificMethodGeneric.CreateDelegate(typeof(Func<TestCase, ValueTask<TestExecutionResult>>), this);
         }
 
-        private static ValueTask<TestExecutionResult> ExecuteSpecificTestAsync<TClass, TActResult>(
+        private ValueTask<TestExecutionResult> ExecuteSpecificTestAsync<TClass, TActResult>(
             TestCase testCaseNonGeneric)
         {
             return
@@ -50,7 +53,7 @@ namespace aaatest.executor
         }
 
 
-        private static TestExecutionResult ExecuteSpecificTest<TClass, TActResult>(
+        private TestExecutionResult ExecuteSpecificTest<TClass, TActResult>(
             TestCase<TClass, TActResult> testCase)
         {
             var sw = Stopwatch.StartNew();
@@ -73,7 +76,9 @@ namespace aaatest.executor
             }
             catch (Exception ex)
             {
-                return new TestExecutionResult(testCase, TestExecutionOutcome.Inconclusive, ex, sw.Elapsed);
+                var isAssertionIssue = _failureDetector.IsAssertionFailure(ex);
+                return new TestExecutionResult(testCase,
+                    isAssertionIssue ? TestExecutionOutcome.Failure : TestExecutionOutcome.Inconclusive, ex, sw.Elapsed);
             }
 
             return new TestExecutionResult(testCase, TestExecutionOutcome.Success, null, sw.Elapsed);

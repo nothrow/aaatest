@@ -9,7 +9,7 @@ namespace tester
     {
         private static async Task MainAsync()
         {
-            var executor = new Executor(ConsoleTracer.Instance);
+            var executor = new Executor(ConsoleTracer.Instance, FluentAssertionsPlugin.Instance);
             var results =
                 await Task.WhenAll(
                     new TestClassCrawler<UnitTest>(ConsoleTracer.Instance).EnumerateTests()
