@@ -67,18 +67,18 @@ namespace aaatest.executor
             }
             catch (Exception ex)
             {
-                return new TestExecutionResult(testCase, TestExecutionOutcome.Inconclusive, ex, sw.Elapsed);
+                return new TestExecutionResult(testCase, TestExecutionOutcome.Invalid, ex, sw.Elapsed);
             }
 
             try
             {
-                testCase.Assert(result);
+                testCase.Assert.Compile(result);
             }
             catch (Exception ex)
             {
                 var isAssertionIssue = _failureDetector.IsAssertionFailure(ex);
                 return new TestExecutionResult(testCase,
-                    isAssertionIssue ? TestExecutionOutcome.Failure : TestExecutionOutcome.Inconclusive, ex, sw.Elapsed);
+                    isAssertionIssue ? TestExecutionOutcome.Failure : TestExecutionOutcome.Invalid, ex, sw.Elapsed);
             }
 
             return new TestExecutionResult(testCase, TestExecutionOutcome.Success, null, sw.Elapsed);
