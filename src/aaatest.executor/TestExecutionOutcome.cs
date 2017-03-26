@@ -1,5 +1,8 @@
 ﻿namespace aaatest.executor
 {
+    /// <summary>
+    /// Enum with values describing outcome of the test
+    /// </summary>
     public enum TestExecutionOutcome
     {
         /// <summary>

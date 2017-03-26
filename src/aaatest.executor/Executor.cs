@@ -72,7 +72,7 @@ namespace aaatest.executor
 
             try
             {
-                testCase.Assert.Compile(result);
+                testCase.Assert(result);
             }
             catch (Exception ex)
             {

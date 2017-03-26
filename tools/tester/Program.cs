@@ -19,7 +19,7 @@ namespace tester
             Console.WriteLine();
             foreach (var result in results)
                 Console.WriteLine(
-                    $"{result.TestCase.Name} was {result.Outcome} in {result.ExecutionTime} because {result.Exception}");
+                    $"{result.TestCase.Name}({result.TestCase.Identifier}) was {result.Outcome} in {result.ExecutionTime} because {result.Exception}");
         }
 
         private static void Main(string[] args)

@@ -8,6 +8,18 @@ namespace aaatest.executor
 {
     public class TestClassCrawler<T> where T : new()
     {
+        private struct TestWithMethodInfo
+        {
+            public TestWithMethodInfo(MethodInfo method, TestCase testCase)
+            {
+                Method = method;
+                TestCase = testCase;
+            }
+
+            public MethodInfo Method { get; }
+            public TestCase TestCase { get; }
+        }
+
         private readonly ITracer _tracer;
 
         public TestClassCrawler(ITracer tracer)
@@ -23,25 +35,38 @@ namespace aaatest.executor
                 typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public).
                     Where(IsUnitTestMethod).
                     Select(TraceMethodFound).
-                    SelectMany(DiscoverTests).
-                    Select(SetTestName);
+                    Select(DiscoverTests).
+                    SelectMany(SetTestIdentifier).
+                    Select(SetTestName).
+                    // finally
+                    Select(tm => tm.TestCase);
         }
 
-        private static TestCase SetTestName((MethodInfo method, TestCase testCase) test)
+        private static IEnumerable<TestWithMethodInfo> SetTestIdentifier(IEnumerable<TestWithMethodInfo> tests)
         {
-            return test.testCase.SetName(test.method.Name);
+            return tests.Select((test, i) => new TestWithMethodInfo(test.Method, test.TestCase.SetTestIdentifier(
+                    $"{test.Method.DeclaringType.FullName}.{test.Method.Name}.#{i}"
+                ))
+            );
         }
 
-        private static IEnumerable<(MethodInfo method, TestCase testCase)> DiscoverTests(MethodInfo method)
+        private static TestWithMethodInfo SetTestName(TestWithMethodInfo test)
+        {
+            return new TestWithMethodInfo(test.Method, test.TestCase.SetName(test.Method.Name));
+        }
+
+        private static IEnumerable<TestWithMethodInfo> DiscoverTests(MethodInfo method)
         {
             IEnumerable<TestCase> testCases;
+
             if (method.ReturnType == typeof(TestCase))
                 testCases = new[] {(TestCase) method.Invoke(new T(), null)};
             else if (method.ReturnType == typeof(IEnumerable<TestCase>))
                 testCases = (IEnumerable<TestCase>) method.Invoke(new T(), null);
             else
                 throw new InvalidOperationException();
-            return testCases.Select(testCase => (method: method, testCase: testCase));
+
+            return testCases.Select(testCase => new TestWithMethodInfo(method, testCase));
         }
 
 

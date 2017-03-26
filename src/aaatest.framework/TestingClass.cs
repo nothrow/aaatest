@@ -1,54 +1,47 @@
 ﻿using System;
 using System.Linq.Expressions;
+using JetBrains.Annotations;
 
 namespace aaatest.framework
 {
     /// <summary>
-    ///     Defines which class is being unit tested
+    /// Defines which class is being unit tested
     /// </summary>
     /// <typeparam name="TClass"></typeparam>
     public abstract class TestingClass<TClass> where TClass : class
     {
-        protected TestCase Test<TActResult>(Func<TestingContext<TClass>, TClass> arrange,
-            Expression<Func<TClass, TActResult>> act, Action<TActResult> assert)
+        /// <summary>
+        /// Full Arrange, Act, Assert unit test
+        /// </summary>
+        /// <typeparam name="TActResult"></typeparam>
+        /// <param name="arrange"></param>
+        /// <param name="act"></param>
+        /// <param name="assert"></param>
+        /// <returns></returns>
+        protected TestCase Test<TActResult>([NotNull] Func<TestingContext<TClass>, TClass> arrange,
+            [NotNull] Expression<Func<TClass, TActResult>> act, [NotNull] Action<TActResult> assert)
         {
+            Check.NotNull(arrange, nameof(arrange));
+            Check.NotNull(act, nameof(act));
+            Check.NotNull(assert, nameof(assert));
+
             return new TestCase<TClass, TActResult>(arrange, act, assert);
         }
-    }
 
-    public sealed class TestingContext<TClass>
-    {
-        public TClass CreateSubject()
+        /// <summary>
+        /// Test without arrangment
+        /// </summary>
+        /// <typeparam name="TActResult"></typeparam>
+        /// <param name="act"></param>
+        /// <param name="assert"></param>
+        /// <returns></returns>
+        protected TestCase Test<TActResult>([NotNull] Expression<Func<TClass, TActResult>> act,
+            [NotNull] Action<TActResult> assert)
         {
-            return (TClass) Activator.CreateInstance(typeof(TClass));
+            Check.NotNull(act, nameof(act));
+            Check.NotNull(assert, nameof(assert));
+
+            return Test(ctx => ctx.CreateSubject(), act, assert);
         }
-    }
-
-    public abstract class TestCase
-    {
-        public string Name { get; private set; }
-
-        public TestCase SetName(string name)
-        {
-            if (Name == null)
-                Name = name;
-
-            return this;
-        }
-    }
-
-    public sealed class TestCase<TClass, TActResult> : TestCase
-    {
-        public TestCase(Func<TestingContext<TClass>, TClass> arrange, Expression<Func<TClass, TActResult>> act,
-            Action<TActResult> assert)
-        {
-            Arrange = arrange;
-            Act = act;
-            Assert = assert;
-        }
-
-        public Func<TestingContext<TClass>, TClass> Arrange { get; }
-        public Expression<Func<TClass, TActResult>> Act { get; }
-        public Action<TActResult> Assert { get; }
     }
 }
