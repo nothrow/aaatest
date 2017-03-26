@@ -1,2 +1,20 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateStaticReadonly/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="_" Suffix="" Style="aaBb" /&gt;</s:String></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/CodeStyle/CodeFormatting/XmlDocFormatter/IndentTagContent/@EntryValue">ZeroIndent</s:String>
+	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateStaticReadonly/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="_" Suffix="" Style="aaBb" /&gt;</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/Comment/@EntryValue">Use Check.NotNull</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/IsReplacePattern/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/LanguageName/@EntryValue">CSHARP</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/ReplaceComment/@EntryValue">Replace with Check.NotNull</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/ReplacePattern/@EntryValue">aaatest.Check.NotNull($parameter$, nameof($parameter$));</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/SearchPattern/@EntryValue">if ($parameter$ == null) throw new ArgumentNullException($expression$);</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/Severity/@EntryValue">SUGGESTION</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=expression/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=expression/Properties/=Maximal/@EntryIndexedValue">-1</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=expression/Properties/=Minimal/@EntryIndexedValue">-1</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=expression/Type/@EntryValue">ArgumentPlaceholder</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=parameter/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=parameter/Properties/=ExactType/@EntryIndexedValue">False</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=parameter/Properties/=ExpressionType/@EntryIndexedValue"></s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/StructuralSearch/Pattern/=B16BFF3BE28149ABA320206E5299E73F/CustomPatternPlaceholder/=parameter/Type/@EntryValue">ExpressionPlaceholder</s:String>
+</wpf:ResourceDictionary>

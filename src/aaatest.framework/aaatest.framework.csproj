@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\Annotations.cs" Link="Annotations.cs" />
+    <Compile Include="..\Shared\*.cs" />
   </ItemGroup>
 
 </Project>
