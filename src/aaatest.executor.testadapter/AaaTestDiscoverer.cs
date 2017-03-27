@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using aaatest.framework;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -27,28 +30,37 @@ namespace aaatest.executor.testadapter
             _tracer.Debug(
                 $"Test discovery starting - using {RuntimeInformation.FrameworkDescription}, PID {Process.GetCurrentProcess().Id}");
 
+            DiscoverTestsAsync(sources, discoverySink).Wait();
+        }
 
-            foreach (var source in sources)
+        private Task DiscoverTestsAsync(IEnumerable<string> sources, ITestCaseDiscoverySink discoverySink)
+        {
+            return Task.WhenAll(sources.Select(async source =>
+            {
                 using (_tracer.MeasureTrace($"Processing {source}", ts => $"Processing {source} took {ts}"))
                 {
                     try
                     {
                         var asm = Assembly.Load(new AssemblyName(Path.GetFileNameWithoutExtension(source)));
-                        DiscoverAssembly(discoverySink, asm, _tracer, source);
+                        await DiscoverAssembly(discoverySink, asm, source);
                     }
                     catch (FileLoadException flex)
                     {
                         _tracer.Error($"Unable to load {source}: {flex.Message} 0x{flex.HResult:X8}");
                     }
                 }
+            }));
         }
 
-        private static void DiscoverAssembly(ITestCaseDiscoverySink discoverySink, Assembly asm, ITracer tracer,
+        private Task DiscoverAssembly(ITestCaseDiscoverySink discoverySink, Assembly asm,
             string source)
         {
-            tracer.Debug($"Processing assembly {asm.FullName}");
-            foreach (var type in asm.GetTypes().Where(IsUnitTestType))
-                DiscoverType(discoverySink, tracer, type, source);
+            _tracer.Debug($"Processing assembly {asm.FullName}");
+            return
+                Task.WhenAll(
+                    asm.GetTypes()
+                        .Where(IsUnitTestType)
+                        .Select(type => DiscoverType(discoverySink, type, source)));
         }
 
         private static bool IsUnitTestType(Type type)
@@ -60,13 +72,17 @@ namespace aaatest.executor.testadapter
             return type.GetTypeInfo().BaseType != null && IsUnitTestType(type.GetTypeInfo().BaseType);
         }
 
-        private static void DiscoverType(ITestCaseDiscoverySink discoverySink, ITracer tracer, Type type, string source)
+        private Task DiscoverType(ITestCaseDiscoverySink discoverySink, Type type, string source)
         {
-            tracer.Debug($"Processing class {type.FullName}");
-            var crawler = new TestClassCrawler(tracer, type);
+            return Task.Run(() =>
+            {
+                _tracer.Debug($"Processing class {type.FullName}");
 
-            foreach (var test in crawler.EnumerateTests())
-                discoverySink.SendTestCase(test.ConvertToVsTest(source));
+                var crawler = new TestClassCrawler(_tracer, type);
+
+                foreach (var test in crawler.EnumerateTests())
+                    discoverySink.SendTestCase(test.ConvertToVsTest(source));
+            });
         }
     }
 }
