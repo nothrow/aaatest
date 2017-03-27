@@ -13,6 +13,7 @@ using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using TestCase = aaatest.framework.TestCase;
 
 namespace aaatest.executor.testadapter
 {
@@ -21,6 +22,7 @@ namespace aaatest.executor.testadapter
     public class AaaTestDiscoverer : ITestDiscoverer
     {
         private ITracer _tracer;
+        private ConcurrentDictionary<string, framework.TestCase> _knownTestCases = new ConcurrentDictionary<string, framework.TestCase>();
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
             ITestCaseDiscoverySink discoverySink)
@@ -81,8 +83,16 @@ namespace aaatest.executor.testadapter
                 var crawler = new TestClassCrawler(_tracer, type);
 
                 foreach (var test in crawler.EnumerateTests())
+                {
+                    _knownTestCases[test.Identifier] = test;
                     discoverySink.SendTestCase(test.ConvertToVsTest(source));
+                }
             });
+        }
+
+        public TestCase GetTest(string testFullyQualifiedName)
+        {
+            return _knownTestCases[testFullyQualifiedName];
         }
     }
 }
