@@ -53,7 +53,9 @@ namespace aaatest.executor
             else
                 throw new InvalidOperationException();
 
-            return testCases.Select(testCase => new TestWithMethodInfo(method, testCase));
+            return testCases.
+                Where(testCase => !testCase.HarnessOnly).
+                Select(testCase => new TestWithMethodInfo(method, testCase));
         }
 
         private static bool IsUnitTestMethod(MethodInfo method)

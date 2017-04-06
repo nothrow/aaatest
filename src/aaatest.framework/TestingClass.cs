@@ -11,6 +11,29 @@ namespace aaatest.framework
     /// <typeparam name="TClass"></typeparam>
     public abstract class TestingClass<TClass> where TClass : class
     {
+        protected TestCase Harness([NotNull] Func<TestingContext<TClass>, TClass> arrange,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            Check.NotNull(arrange, nameof(arrange));
+
+            return new TestCase<TClass>(arrange, new CallerInformation(memberName, sourceFilePath, sourceLineNumber));
+        }
+
+
+        protected TestCase Test<TActResult>([NotNull] TestCase harness, [NotNull] Expression<Func<TClass, TActResult>> act,
+            [NotNull] Action<TActResult> assert,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            Check.NotNull(harness, nameof(harness));
+            Check.NotNull(act, nameof(act));
+            Check.NotNull(assert, nameof(assert));
+
+            return new TestCase<TClass, TActResult>(((TestCase<TClass>)harness).Arrange, act, assert, new CallerInformation(memberName, sourceFilePath, sourceLineNumber));
+        }
         /// <summary>
         /// Full Arrange, Act, Assert unit test
         /// </summary>
@@ -22,7 +45,6 @@ namespace aaatest.framework
         /// <param name="sourceFilePath"></param>
         /// <param name="sourceLineNumber"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.NoInlining)]
         protected TestCase Test<TActResult>([NotNull] Func<TestingContext<TClass>, TClass> arrange,
             [NotNull] Expression<Func<TClass, TActResult>> act, [NotNull] Action<TActResult> assert,
             [CallerMemberName] string memberName = "",
@@ -57,5 +79,9 @@ namespace aaatest.framework
 
             return new TestCase<TClass, TActResult>(ctx => ctx.CreateSubject(), act, assert, new CallerInformation(memberName, sourceFilePath, sourceLineNumber));
         }
+    }
+
+    public class TestArrangeHarness
+    {
     }
 }

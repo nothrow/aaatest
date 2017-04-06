@@ -7,6 +7,19 @@ namespace aaatest.Tests
 {
     internal class UnitTest : TestingClass<TestingSubject>
     {
+
+        public TestCase Harness()
+        {
+            return Harness(context => context.CreateSubject());
+        }
+
+        public TestCase UsingHarness()
+        {
+            return Test(Harness(),
+                subject => subject.AddTwoValues(1, 2),
+                result => result.Should().Be(3));
+        }
+
         public TestCase InitializationFails()
         {
             return Test(
