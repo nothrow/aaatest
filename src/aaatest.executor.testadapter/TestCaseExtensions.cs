@@ -9,7 +9,9 @@ namespace aaatest.executor.testadapter
         {
             return new TestCase(tc.Identifier, AaaTestExecutor.ExecutorUri, sourceAssembly)
             {
-
+                CodeFilePath = tc.CallerInformation.SourceFilePath,
+                LineNumber = tc.CallerInformation.SourceLineNumber,
+                DisplayName  = $"{tc.Identifier} - {tc.CallerInformation.SourceFilePath}:{tc.CallerInformation.SourceLineNumber} {sourceAssembly}",
             };
         }
 
