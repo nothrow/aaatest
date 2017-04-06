@@ -10,7 +10,7 @@ namespace aaatest.Tests
         public TestCase InitializationFails()
         {
             return Test(
-                context => { throw new Exception(); },
+                context => throw new Exception(),
                 subject => subject.AddTwoValues(1, 2),
                 result => result.Should().Be(3));
         }

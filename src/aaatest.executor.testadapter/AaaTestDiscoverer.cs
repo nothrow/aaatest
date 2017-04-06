@@ -22,17 +22,21 @@ namespace aaatest.executor.testadapter
     public class AaaTestDiscoverer : ITestDiscoverer
     {
         private ITracer _tracer;
-        private ConcurrentDictionary<string, framework.TestCase> _knownTestCases = new ConcurrentDictionary<string, framework.TestCase>();
+        private readonly ConcurrentDictionary<string, framework.TestCase> _knownTestCases = new ConcurrentDictionary<string, framework.TestCase>();
 
-        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger,
-            ITestCaseDiscoverySink discoverySink)
+        void ITestDiscoverer.DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
+        {
+            DiscoverTests(sources, discoveryContext, logger, discoverySink, default(CancellationToken));
+        }
+
+        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink, CancellationToken token)
         {
             _tracer = new MessageLoggerTracer(logger);
 
             _tracer.Debug(
                 $"Test discovery starting - using {RuntimeInformation.FrameworkDescription}, PID {Process.GetCurrentProcess().Id}");
 
-            DiscoverTestsAsync(sources, discoverySink).Wait();
+            DiscoverTestsAsync(sources, discoverySink).Wait(token);
         }
 
         private Task DiscoverTestsAsync(IEnumerable<string> sources, ITestCaseDiscoverySink discoverySink)

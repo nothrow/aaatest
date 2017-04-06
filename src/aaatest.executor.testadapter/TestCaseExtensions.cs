@@ -11,8 +11,17 @@ namespace aaatest.executor.testadapter
             {
                 CodeFilePath = tc.CallerInformation.SourceFilePath,
                 LineNumber = tc.CallerInformation.SourceLineNumber,
-                DisplayName  = $"{tc.Identifier} - {tc.CallerInformation.SourceFilePath}:{tc.CallerInformation.SourceLineNumber} {sourceAssembly}",
+                DisplayName  = BuildDisplayName(tc),
             };
+        }
+
+        private static string BuildDisplayName(framework.TestCase tc)
+        {
+            var rv = $"{tc.CallerInformation.MemberName}";
+            if (tc.Name != null && tc.Name != tc.CallerInformation.MemberName)
+                rv += " - " + tc.Name;
+
+            return rv;
         }
 
         public static TestResult ConvertToVsResult(this TestExecutionResult result, TestCase testCase)
