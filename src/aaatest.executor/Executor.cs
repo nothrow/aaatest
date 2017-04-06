@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using aaatest.framework;
 
@@ -22,13 +23,15 @@ namespace aaatest.executor
             _failureDetector = failureDetector;
         }
 
-        public ValueTask<TestExecutionResult> Execute(TestCase test)
+        public ValueTask<TestExecutionResult> Execute(TestCase test, CancellationToken token = default(CancellationToken))
         {
             using (
                 _tracer.MeasureTrace($"Executing {test.Name}",
                     executed => $"{test.Name} finished, took {executed.TotalSeconds:0.000}s"))
             {
-                return _executors.GetOrAdd(test.GetType(), GenerateExecutor)(test);
+                var testExecutor = _executors.GetOrAdd(test.GetType(), GenerateExecutor);
+                token.ThrowIfCancellationRequested();
+                return testExecutor(test);
             }
         }
 
